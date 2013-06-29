@@ -3,5 +3,5 @@ def pwd
 end
 
 every '*/30 * * * *' do
-  command "cd #{pwd} && heroku run:rake robot"
+  command "cd #{pwd} && heroku run rake"
 end
