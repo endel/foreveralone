@@ -27,20 +27,21 @@ trolling_list = [
   'Hey there!!',
   'Snif, snif, snif, snif...',
   'So alone, snif :(',
-  'You are with me :('
+  "So let's get together..."
 ]
-client = Twitter::Client.new
 
-task :robot do
+client = Twitter::Client.new
+task :default do
   timestamp = Time.at((REDIS.get('lasttime') || Time.now).to_i)
   trolling_list = trolling_list.shuffle
 
   ["forever alone"].each do |phrase|
-    Twitter::Search.new.phrase(phrase).fetch.each do |tweet|
+    Twitter.search(phrase, :count => 20, :result_type => "recent").results.each do |tweet|
+      puts tweet.inspect
       next if tweet.text[0..0] == "@"
       trolling_message = trolling_list.pop
-      tweet_timestamp = Time.parse(tweet.created_at)
-      if tweet_timestamp > timestamp
+      if tweet.created_at > timestamp
+        puts "@#{tweet.from_user} #{trolling_message}".inspect
         client.update("@#{tweet.from_user} #{trolling_message}")
       end
       trolling_list = [trolling_message] + trolling_list
